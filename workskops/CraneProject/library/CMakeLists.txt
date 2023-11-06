@@ -4,10 +4,8 @@ project(Library)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILES
-    include/functions.h
-    include/Student.h
-    src/functions.cpp
-    src/Student.cpp
+        include/Container.h
+        src/Container.cpp
 )
 
 add_library(Library ${SOURCE_FILES})
@@ -47,8 +45,8 @@ endif()
 
 set(SOURCE_TEST_FILES
         test/master.cpp
-        test/StudentTest.cpp
-        )
+        test/ContainerTest.cpp
+)
 
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -57,10 +55,17 @@ include_directories(
 
 add_executable (Test ${SOURCE_TEST_FILES})
 
+add_executable (TestContainer ${SOURCE_TEST_FILES})
+
 target_link_libraries (Test
         Library
         ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
         )
+
+target_link_libraries (TestContainer
+        Library
+        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+)
 
 add_custom_target(check ${CMAKE_COMMAND} -E env CTEST_OUTPUT_ON_FAILURE=1 BOOST_TEST_LOG_LEVEL=all
         ${CMAKE_CTEST_COMMAND} -C $<CONFIG> --verbose
@@ -68,3 +73,9 @@ add_custom_target(check ${CMAKE_COMMAND} -E env CTEST_OUTPUT_ON_FAILURE=1 BOOST_
 
 enable_testing()
 add_test(LibraryTest Test)
+
+add_test(TestWeight TestContainer
+        --report_level=detailed
+        --log_level=all
+        --color_output=yes
+)
