@@ -4,7 +4,7 @@
 
 using namespace std;
 
-void display(const Container& c) {
+void display(Container c) {
     cout << "Container Information:" << endl;
     cout << "Number: " << c.getNumber() << endl;
     cout << "Tare Weight: " << c.getTare() << " kg" << endl;
@@ -18,8 +18,8 @@ void display(const Container& c) {
 
 void testLocalObject(){
     Container container1(1);
-    container1.setTare(100);
     container1.setMaxWeight(1000);
+    container1.setTare(100);
     container1.setStrength(1000);
     container1.loadCargo(500);
     display(container1);
@@ -55,6 +55,7 @@ void display(Container* p){
     cout << "Gross Weight: " << p->getGrossWeight() << " kg" << endl;
     cout << "Max Cargo: " << p->getMaxCargo() << " kg" << endl;
     cout << "---------------------------------" << endl;
+    cout << p << endl;
 }
 
 void testDynamicObject(){
@@ -65,6 +66,5 @@ void testDynamicObject(){
 
 int main() {
     testLocalObject();
-
     return 0;
 }

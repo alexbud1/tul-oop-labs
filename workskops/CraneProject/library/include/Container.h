@@ -8,7 +8,8 @@
 class Container {
 public:
     Container();
-    explicit Container(int number);
+    explicit Container(int number); // constructor with number
+
     Container(const Container& orig); // copy constructor
     virtual ~Container(); // destructor
 
