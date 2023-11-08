@@ -6,6 +6,8 @@ project(Library)
 set(SOURCE_FILES
         include/Container.h
         src/Container.cpp
+        include/ContainerStack.h
+        src/ContainerStack.cpp
 )
 
 add_library(Library ${SOURCE_FILES})
@@ -46,6 +48,7 @@ endif()
 set(SOURCE_TEST_FILES
         test/master.cpp
         test/ContainerTest.cpp
+        test/ContainerStackTest.cpp
 )
 
 include_directories(
@@ -53,7 +56,8 @@ include_directories(
         ${Boost_INCLUDE_DIRS}
 )
 
-add_executable (Test ${SOURCE_TEST_FILES})
+add_executable (Test ${SOURCE_TEST_FILES}
+        test/ContainerStackTest.cpp)
 
 add_executable (TestContainer ${SOURCE_TEST_FILES})
 
