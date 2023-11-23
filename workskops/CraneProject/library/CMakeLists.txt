@@ -8,6 +8,8 @@ set(SOURCE_FILES
         src/Container.cpp
         include/ContainerStack.h
         src/ContainerStack.cpp
+        include/Crane.h
+        src/Crane.cpp
 )
 
 add_library(Library ${SOURCE_FILES})
@@ -57,7 +59,8 @@ include_directories(
 )
 
 add_executable (Test ${SOURCE_TEST_FILES}
-        test/ContainerStackTest.cpp)
+        test/ContainerStackTest.cpp
+        test/CraneTest.cpp)
 
 add_executable (TestContainer ${SOURCE_TEST_FILES})
 
