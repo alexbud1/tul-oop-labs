@@ -7,38 +7,35 @@
 
 #include "ContainerStack.h"
 #include "Container.h"
+#include "MovableAbstract.h"
+#include "ContainerHandlerAbstract.h"
 
 const int MAX_STACKS = 5;
+const int TRUCK_CAPACITY = 2; // number of containers that can be loaded on truck, it also defines backwardLimit as -3
+const int PARKED_POSITION = -1;
 
-class Crane {
-private:
-    ContainerStack storage[MAX_STACKS];
-    int position;
-    Container container;
+class Crane: public MovableAbstract, public ContainerHandlerAbstract {
+
 public:
-    Crane(); // empty constructor
-    Crane(int position, ContainerStack storage[MAX_STACKS], Container container); // constructor with position
-    Crane(const Crane& orig); // copy constructor
-    virtual ~Crane(); // destructor
+    Crane(); // default constructor
+    ~Crane() override; // destructor
 
-
+    // UNIQUE methods especially for Crane
     bool isParked() const;
-    bool isLoaded() const;
-    bool isUnloaded() const;
-    bool isWaitingEmpty() const;
-    bool isWaitingFull() const;
     void park();
     void toTrailer();
-    void load(Container& container);
-    Container unload();
-    void forward(int numSteps);
-    void backward(int numSteps);
-    void pickUp();
-    void putDown();
-    int getPosition() const;
-    Container& getContainer();
-    ContainerStack& stackAt(int position);
-    bool canPutDown();
+
+    // methods from ContainerHandlerAbstract
+    bool isLoaded() override;
+    bool isUnloaded() override;
+    bool isWaitingEmpty() override;
+    bool isWaitingFull() override;
+    void load(Container& container) override;
+    Container unload() override;
+    void pickUp() override;
+    void putDown() override;
+    ContainerStack& stackAt(int position) override;
+    bool canPutDown() override;
 };
 
 

@@ -4,115 +4,106 @@
 #include "ContainerStack.h"
 #include <stdexcept>
 #include "Crane.h"
-#include <iostream>
+#include "MovableAbstract.h"
+#include "ContainerHandlerAbstract.h"
 
 using namespace std;
 
-// empty constructor
-Crane::Crane()= default;
-
-// constructor with all parameters
-Crane::Crane(int position, ContainerStack storage[MAX_STACKS], Container container){
-    this->position = position;
-    this->container = container;
-    for (int i = 0; i < MAX_STACKS; ++i) {
-        this->storage[i] = storage[i];
-    }
-}
-
-// copy constructor
-Crane::Crane(const Crane& orig){
-    position = orig.position;
-    container = orig.container;
-    for (int i = 0; i < MAX_STACKS; ++i) {
-        storage[i] = orig.storage[i];
-    }
+// default constructor
+Crane::Crane()
+        : MovableAbstract(::MAX_STACKS, TRUCK_CAPACITY),
+        ContainerHandlerAbstract(::MAX_STACKS) {
 }
 
 // destructor
 Crane::~Crane()= default;
 
+
+
+
+
+
+
+//******* definition of methods UNIQUE for Crane *******//
+
 bool Crane::isParked() const{
-    return position == -1; // -1 means parked
+    return getPosition() == PARKED_POSITION;
 }
 
-bool Crane::isLoaded() const{
-    return container.getNumber() != 0;
-}
-
-bool Crane::isUnloaded() const{
-    return container.getNumber() == 0;
-}
-
-bool Crane::isWaitingEmpty() const{
-    return isUnloaded();
-}
-
-bool Crane::isWaitingFull() const{
-    return isLoaded();
-}
 
 void Crane::park(){
     if (isParked()){
         throw runtime_error("Crane is already parked");
     }
-    if (isLoaded()){
+    if (isLoaded() || isWaitingFull()){
         throw runtime_error("Crane is loaded");
     }
-    position = -1;
+    setPosition(PARKED_POSITION);
 }
 
 void Crane::toTrailer(){
-    if (getPosition() == -2){
+    if (getPosition() == -TRUCK_CAPACITY){
         throw runtime_error("Crane is already near the trailer");
     }
-    position = -2;
+    setPosition(-TRUCK_CAPACITY);
+}
+
+//******* *******//
+
+
+
+
+
+//******* definition of methods from ContainerHandlerAbstract *******//
+bool Crane::isLoaded(){
+    return getContainer().getNumber() != 0 && getPosition() == -TRUCK_CAPACITY;
+}
+
+bool Crane::isUnloaded(){
+    return getContainer().getNumber() == 0 && getPosition() == -TRUCK_CAPACITY;
+}
+
+bool Crane::isWaitingEmpty(){
+    return getContainer().getNumber() == 0 && getPosition() >= 0;
+}
+
+bool Crane::isWaitingFull(){
+    return getContainer().getNumber() != 0 && getPosition() >= 0;
 }
 
 void Crane::load(Container& container){
     if (isLoaded()){
         throw runtime_error("Crane is already loaded");
     }
-    if (position != -2){
+    if (getPosition() != -TRUCK_CAPACITY){
         throw runtime_error("Crane is not over the trailer");
     }
-    this->container = container;
+    setContainer(container);
 }
 
 Container Crane::unload(){
     if (isUnloaded()){
         throw runtime_error("Crane is already unloaded");
     }
-    if (position != -2){
+    if (getPosition() != -TRUCK_CAPACITY){
         throw runtime_error("Crane is not over the trailer");
     }
-    Container temp = container;
-    container = Container();
+    Container temp = getContainer();
+    setContainer();
     return temp;
-}
-
-void Crane::forward(int numSteps){
-    if (position + numSteps >= MAX_STACKS-1){
-        throw runtime_error("Crane is out of range");
-    }
-    position += numSteps;
-}
-
-void Crane::backward(int numSteps){
-    if (position - numSteps < -2){
-        throw runtime_error("Crane is out of range");
-    }
-    position -= numSteps;
 }
 
 void Crane::pickUp(){
     if (isWaitingFull()){
         throw runtime_error("Crane is already loaded");
     }
-    if (position < 0){
+    if (getPosition() < 0){
         throw runtime_error("Crane is not over the stack");
     }
-    container = storage[position].at(storage[position].getSize()-1);
+    ContainerStack* storage = getStorage();
+    int position = getPosition();
+    Container container = storage[position].at(storage[position].getSize() - 1);
+    setContainer(container);
     storage[position].take();
 }
 
@@ -120,25 +111,21 @@ void Crane::putDown(){
     if (isWaitingEmpty()){
         throw runtime_error("Crane is already unloaded");
     }
-    if (position < 0){
+    if (getPosition() < 0){
         throw runtime_error("Crane is not over the stack");
     }
-    storage[position].give(container);
-    container = Container();
+    ContainerStack* storage = getStorage();
+    int position = getPosition();
+    storage[position].give(getContainer());
+    setContainer();
 }
 
-int Crane::getPosition() const{
-    return position;
-}
-
-Container& Crane::getContainer(){
-    return container;
-}
 
 ContainerStack& Crane::stackAt(int position){
-    if (position < 0 || position >= MAX_STACKS){
+    if (position < 0 || position >= ::MAX_STACKS){
         throw runtime_error("Position is out of range");
     }
+    ContainerStack* storage = getStorage();
     return storage[position];
 }
 
@@ -146,10 +133,12 @@ bool Crane::canPutDown() {
     if (isWaitingEmpty()){
         return false;
     }
-    if (position < 0){
+    if (getPosition() < 0){
         return false;
     }
+    ContainerStack* storage = getStorage();
+    int position = getPosition();
     return storage[position].getSize() < stackAt(position).getCapacity();
 }
 
-
+//******* *******//

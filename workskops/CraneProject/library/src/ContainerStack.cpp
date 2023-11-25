@@ -19,12 +19,12 @@ ContainerStack::ContainerStack(const ContainerStack& orig){
 ContainerStack::~ContainerStack()= default;
 
 // get capacity of stack
-int ContainerStack::getCapacity() {
+unsigned int ContainerStack::getCapacity() const{
     return MAX_HEIGHT;
 }
 
 // get size of stack
-int ContainerStack::getSize() const{
+unsigned int ContainerStack::getSize() const{
     return containers.size();
 }
 

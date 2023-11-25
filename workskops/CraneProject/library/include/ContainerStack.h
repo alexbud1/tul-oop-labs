@@ -6,19 +6,20 @@
 #define CRANEPROJECT_CONTAINERSTACK_H
 
 #include "Container.h"
+#include "LoadableAbstract.h"
 #include <vector>
 
 constexpr unsigned MAX_HEIGHT = 10;
 
-class ContainerStack {
+class ContainerStack: public LoadableAbstract {
 public:
     ContainerStack();
 
     ContainerStack(const ContainerStack& orig); // copy constructor
     virtual ~ContainerStack(); // destructor
 
-    static int getCapacity() ; // get capacity of stack
-    int getSize() const; // get size of stack
+    unsigned int getCapacity() const; // get capacity of stack
+    unsigned int getSize() const; // get size of stack
     Container at(int height) const; // get container reference at specific height
     void give(Container& container); // put container on top of stack
     void take(); // take container from top of stack

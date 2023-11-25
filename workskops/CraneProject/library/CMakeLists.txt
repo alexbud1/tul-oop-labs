@@ -10,6 +10,11 @@ set(SOURCE_FILES
         src/ContainerStack.cpp
         include/Crane.h
         src/Crane.cpp
+        include/MovableAbstract.h
+        include/ContainerHandlerAbstract.h
+        include/LoadableAbstract.h
+        include/Truck.h
+        src/Truck.cpp
 )
 
 add_library(Library ${SOURCE_FILES})
@@ -60,7 +65,9 @@ include_directories(
 
 add_executable (Test ${SOURCE_TEST_FILES}
         test/ContainerStackTest.cpp
-        test/CraneTest.cpp)
+        test/CraneTest.cpp
+        test/MovableTest.cpp
+        test/TruckTest.cpp)
 
 add_executable (TestContainer ${SOURCE_TEST_FILES})
 

@@ -2,6 +2,8 @@
 #include "Container.h"
 #include "ContainerStack.h"
 #include "Crane.h"
+#include "MovableAbstract.h"
+#include "ContainerHandlerAbstract.h"
 
 
 using namespace std;
@@ -67,11 +69,5 @@ void testDynamicObject(){
 }
 
 int main() {
-    ContainerStack stack1;
-    Container container(234);
-    stack1.give(container);
-    ContainerStack storage[5];
-    Crane crane(-1, storage, Container());
-    cout << "Stack1 size " << stack1.getSize() << endl;
     return 0;
 }

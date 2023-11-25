@@ -10,335 +10,265 @@
 
 BOOST_AUTO_TEST_SUITE(CraneTestSuite)
 
-    BOOST_AUTO_TEST_CASE(testCrane_positionParked_shouldBeParked) {
+    BOOST_AUTO_TEST_CASE(testCrane_constructor_checkIfCraneIsParked) {
         Crane crane;
+        BOOST_CHECK_EQUAL(crane.isParked(), true);
+    }
+
+    BOOST_AUTO_TEST_CASE(testCrane_parkCrane_checkIfCraneIsParked) {
+        Crane crane;
+        crane.forward(1);
         crane.park();
-        BOOST_REQUIRE_EQUAL(crane.isParked(), true);
+        BOOST_CHECK_EQUAL(crane.isParked(), true);
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_loadCrane_shouldBeLoaded) {
+    BOOST_AUTO_TEST_CASE(testCrane_parkParkedCrane_shouldThrowException) {
         Crane crane;
-        Container container(234);
-        crane.toTrailer(); // move crane to trailer at -2 position
-        crane.load(container);
-        BOOST_REQUIRE_EQUAL(crane.isLoaded(), true);
-    }
 
-    BOOST_AUTO_TEST_CASE(testCrane_notLoadCrane_shouldNotBeLoaded) {
-        Crane crane;
-        BOOST_REQUIRE_EQUAL(crane.isLoaded(), false);
-    }
+        BOOST_CHECK_THROW(crane.park(), std::runtime_error);
 
-    BOOST_AUTO_TEST_CASE(testCrane_notLoadCrane_shouldBeUnloaded) {
-        Crane crane;
-        BOOST_REQUIRE_EQUAL(crane.isUnloaded(), true);
-    }
-
-    BOOST_AUTO_TEST_CASE(testCrane_loadCrane_shouldNotBeUnloaded) {
-        Crane crane;
-        Container container(234);
-        crane.toTrailer(); // move crane to trailer at -2 position
-        crane.load(container);
-        BOOST_REQUIRE_EQUAL(crane.isUnloaded(), false);
-    }
-
-    BOOST_AUTO_TEST_CASE(testCrane_loadCrane_shouldBeWaitingFull) {
-        Crane crane;
-        Container container(234);
-        crane.toTrailer(); // move crane to trailer at -2 position
-        crane.load(container);
-        BOOST_REQUIRE_EQUAL(crane.isWaitingFull(), true);
-    }
-
-    BOOST_AUTO_TEST_CASE(testCrane_notLoadCrane_shouldBeWaitingEmpty) {
-        Crane crane;
-        BOOST_REQUIRE_EQUAL(crane.isWaitingEmpty(), true);
-    }
-
-    BOOST_AUTO_TEST_CASE(testCrane_loadCrane_shouldNotBeWaitingEmpty) {
-        Crane crane;
-        Container container(234);
-        crane.toTrailer(); // move crane to trailer at -2 position
-        crane.load(container);
-        BOOST_REQUIRE_EQUAL(crane.isWaitingEmpty(), false);
-    }
-
-    BOOST_AUTO_TEST_CASE(testCrane_parkCrane_shouldThrowException) {
-        Crane crane;
-        crane.park();
-        BOOST_REQUIRE_THROW(crane.park(), std::runtime_error);
-
-        try{
+        try {
             crane.park();
-            BOOST_ERROR("Expected std::runtime_error, but no exception was thrown.");
-        } catch (const std::runtime_error& e) {
+        } catch (std::runtime_error& e) {
             BOOST_CHECK_EQUAL(e.what(), "Crane is already parked");
         }
+
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_parkCraneLoaded_shouldThrowException) {
-        Crane crane;
-        Container container(234);
-        crane.toTrailer(); // move crane to trailer at -2 position
-        crane.load(container);
-        BOOST_REQUIRE_THROW(crane.park(), std::runtime_error);
-
-        try{
-            crane.park();
-            BOOST_ERROR("Expected std::runtime_error, but no exception was thrown.");
-        } catch (const std::runtime_error& e) {
-            BOOST_CHECK_EQUAL(e.what(), "Crane is loaded");
-        }
-    }
-
-    BOOST_AUTO_TEST_CASE(testCrane_positionParked_positionShouldBeMinusOne) {
-        Crane crane;
-        crane.park();
-        BOOST_REQUIRE_EQUAL(crane.getPosition(), -1);
-    }
-
-    BOOST_AUTO_TEST_CASE(testCrane_toTrailer_positionShouldBeMinusTwo) {
+    BOOST_AUTO_TEST_CASE(testCrane_toTrailer_checkIfCraneIsOverTrailer) {
         Crane crane;
         crane.toTrailer();
-        BOOST_REQUIRE_EQUAL(crane.getPosition(), -2);
+        BOOST_CHECK_EQUAL(crane.getPosition(), -TRUCK_CAPACITY);
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_toTrailerBeingNearTrailer_shouldThrowException) {
+    BOOST_AUTO_TEST_CASE(testCrane_toTrailerCraneIsOverTrailer_shouldThrowException) {
         Crane crane;
         crane.toTrailer();
-        BOOST_REQUIRE_THROW(crane.toTrailer(), std::runtime_error);
 
-        try{
+        BOOST_CHECK_THROW(crane.toTrailer(), std::runtime_error);
+
+        try {
             crane.toTrailer();
-            BOOST_ERROR("Expected std::runtime_error, but no exception was thrown.");
-        } catch (const std::runtime_error& e) {
+        } catch (std::runtime_error& e) {
             BOOST_CHECK_EQUAL(e.what(), "Crane is already near the trailer");
         }
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_loadCraneNotBeingNearTrailer_shouldThrowException) {
+    BOOST_AUTO_TEST_CASE(testCrane_loadContainer_checkIfContainerIsLoaded) {
         Crane crane;
-        Container container(234);
-        BOOST_REQUIRE_THROW(crane.load(container), std::runtime_error);
+        crane.toTrailer();
+        Container container(1);
+        crane.load(container);
+        BOOST_CHECK_EQUAL(crane.isLoaded(), true);
+    }
 
-        try{
+    BOOST_AUTO_TEST_CASE(testCrane_loadContainerCraneIsNotOverTrailer_shouldThrowException) {
+        Crane crane;
+        Container container(1);
+
+        BOOST_CHECK_THROW(crane.load(container), std::runtime_error);
+
+        try {
             crane.load(container);
-            BOOST_ERROR("Expected std::runtime_error, but no exception was thrown.");
-        } catch (const std::runtime_error& e) {
+        } catch (std::runtime_error& e) {
             BOOST_CHECK_EQUAL(e.what(), "Crane is not over the trailer");
         }
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_loadCraneBeingLoaded_shouldThrowException) {
+    BOOST_AUTO_TEST_CASE(testCrane_loadContainerCraneIsAlreadyLoaded_shouldThrowException) {
         Crane crane;
-        Container container(234);
-        crane.toTrailer(); // move crane to trailer at -2 position
+        crane.toTrailer();
+        Container container(1);
         crane.load(container);
-        BOOST_REQUIRE_THROW(crane.load(container), std::runtime_error);
 
-        try{
+        BOOST_CHECK_THROW(crane.load(container), std::runtime_error);
+
+        try {
             crane.load(container);
-            BOOST_ERROR("Expected std::runtime_error, but no exception was thrown.");
-        } catch (const std::runtime_error& e) {
+        } catch (std::runtime_error& e) {
             BOOST_CHECK_EQUAL(e.what(), "Crane is already loaded");
         }
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_loadCrane_checkContainerNumber) {
+    BOOST_AUTO_TEST_CASE(testCrane_unloadContainer_checkIfContainerIsUnloaded) {
         Crane crane;
-        Container container(234);
-        crane.toTrailer(); // move crane to trailer at -2 position
+        crane.toTrailer();
+        Container container(1);
         crane.load(container);
-        BOOST_REQUIRE_EQUAL(crane.getContainer().getNumber(), 234);
+        crane.unload();
+        BOOST_CHECK_EQUAL(crane.isUnloaded(), true);
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_unloadCraneNotBeingLoaded_shouldThrowException) {
+    BOOST_AUTO_TEST_CASE(testCrane_unloadContainerCraneIsNotOverTrailer_shouldThrowException) {
         Crane crane;
-        BOOST_REQUIRE_THROW(crane.unload(), std::runtime_error);
+        Container container(1);
 
-        try{
+        BOOST_CHECK_THROW(crane.unload(), std::runtime_error);
+
+        try {
             crane.unload();
-            BOOST_ERROR("Expected std::runtime_error, but no exception was thrown.");
-        } catch (const std::runtime_error& e) {
-            BOOST_CHECK_EQUAL(e.what(), "Crane is already unloaded");
-        }
-    }
-
-    BOOST_AUTO_TEST_CASE(testCrane_unloadCraneNotBeingNearTrailer_shouldThrowException) {
-        Crane crane;
-        Container container(234);
-        crane.toTrailer(); // move crane to trailer at -2 position
-        crane.load(container);
-        crane.forward(1);
-        BOOST_REQUIRE_THROW(crane.unload(), std::runtime_error);
-
-        try{
-            crane.unload();
-            BOOST_ERROR("Expected std::runtime_error, but no exception was thrown.");
-        } catch (const std::runtime_error& e) {
+        } catch (std::runtime_error& e) {
             BOOST_CHECK_EQUAL(e.what(), "Crane is not over the trailer");
         }
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_unloadCrane_checkContainerNumber) {
+    BOOST_AUTO_TEST_CASE(testCrane_unloadContainerCraneIsAlreadyUnloaded_shouldThrowException) {
         Crane crane;
-        Container container(234);
-        crane.toTrailer(); // move crane to trailer at -2 position
-        crane.load(container);
-        BOOST_REQUIRE_EQUAL(crane.unload().getNumber(), 234);
+        crane.toTrailer();
+
+        BOOST_CHECK_THROW(crane.unload(), std::runtime_error);
+
+        try {
+            crane.unload();
+        } catch (std::runtime_error& e) {
+            BOOST_CHECK_EQUAL(e.what(), "Crane is already unloaded");
+        }
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_forwardCrane_checkPosition) {
+    BOOST_AUTO_TEST_CASE(testCrane_pickUpContainer_checkIfContainerIsWaitingFull) {
         Crane crane;
-        crane.toTrailer(); // move crane to trailer at -2 position
+        ContainerStack stack;
+        Container container1(1);
+        stack.give(container1);
+        crane.addStack(stack);
+
         crane.forward(1);
-        BOOST_REQUIRE_EQUAL(crane.getPosition(), -1);
+        crane.pickUp();
+        BOOST_CHECK_EQUAL(crane.isWaitingFull(), true);
+        BOOST_CHECK_EQUAL(crane.getContainer().getNumber(), 1);
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_forwardCrane_checkPositionAfterSeveralSteps) {
+    BOOST_AUTO_TEST_CASE(testCrane_pickUpContainerCraneIsNotOverStack_shouldThrowException) {
         Crane crane;
-        crane.toTrailer(); // move crane to trailer at -2 position
-        crane.forward(3);
-        BOOST_REQUIRE_EQUAL(crane.getPosition(), 1);
+        ContainerStack stack;
+        Container container1(1);
+        stack.give(container1);
+        crane.addStack(stack);
+
+        BOOST_CHECK_THROW(crane.pickUp(), std::runtime_error);
+
+        try {
+            crane.pickUp();
+        } catch (std::runtime_error& e) {
+            BOOST_CHECK_EQUAL(e.what(), "Crane is not over the stack");
+        }
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_forwardCraneToLimit_shouldThrowException) {
+    BOOST_AUTO_TEST_CASE(testCrane_pickUpContainerCraneIsAlreadyLoaded_shouldThrowException) {
         Crane crane;
-        crane.toTrailer(); // move crane to trailer at -2 position
-        BOOST_REQUIRE_THROW(crane.forward(7), std::runtime_error);
-    }
+        ContainerStack stack;
+        Container container1(1);
+        stack.give(container1);
+        crane.addStack(stack);
 
-    BOOST_AUTO_TEST_CASE(testCrane_backwardCrane_checkPosition) {
-        Crane crane;
-        crane.toTrailer();// move crane to trailer at -2 position
         crane.forward(1);
-        crane.backward(1);
-        BOOST_REQUIRE_EQUAL(crane.getPosition(), -2);
-    }
-
-    BOOST_AUTO_TEST_CASE(testCrane_backwardCraneToLimit_shouldThrowException) {
-        Crane crane;
-        crane.toTrailer(); // move crane to trailer at -2 position
-        BOOST_REQUIRE_THROW(crane.backward(7), std::runtime_error);
-    }
-
-    BOOST_AUTO_TEST_CASE(testCrane_forwardCrane_checkPositionAfterSeveralStepsAndBackward) {
-        Crane crane;
-        crane.toTrailer(); // move crane to trailer at -2 position
-        crane.forward(3);
-        crane.backward(2);
-        BOOST_REQUIRE_EQUAL(crane.getPosition(), -1);
-    }
-
-    BOOST_AUTO_TEST_CASE(testCrane_pickUpCrane_checkPosition) {
-        // Create stack with one container
-        ContainerStack stack1;
-        Container container(234);
-        stack1.give(container);
-
-        // Create crane with stack
-        ContainerStack storage[MAX_STACKS];
-        storage[0] = stack1;
-        Crane crane(-1, storage, Container());
-
-        crane.toTrailer(); // move crane to trailer at -2 position
-        crane.forward(2);
         crane.pickUp();
-        BOOST_REQUIRE_EQUAL(crane.getPosition(), 0);
+
+        BOOST_CHECK_THROW(crane.pickUp(), std::runtime_error);
+
+        try {
+            crane.pickUp();
+        } catch (std::runtime_error& e) {
+            BOOST_CHECK_EQUAL(e.what(), "Crane is already loaded");
+        }
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_pickUpCrane_checkContainerNumber) {
-        // Create stack with one container
-        ContainerStack stack1;
-        Container container(234);
-        stack1.give(container);
+    BOOST_AUTO_TEST_CASE(testCrane_putDownContainer_checkIfContainerIsWaitingEmpty) {
+        Crane crane;
+        ContainerStack stack;
+        Container container1(1);
+        stack.give(container1);
+        crane.addStack(stack);
 
-        // Create crane with stack
-        ContainerStack storage[MAX_STACKS];
-        storage[0] = stack1;
-        Crane crane(-1, storage, Container());
-
-        crane.toTrailer(); // move crane to trailer at -2 position
-        crane.forward(2);
+        crane.forward(1);
         crane.pickUp();
-        BOOST_REQUIRE_EQUAL(crane.getContainer().getNumber(), 234);
-    }
-
-    BOOST_AUTO_TEST_CASE(testCrane_putDownCrane_checkPosition) {
-        // Create stack with one container
-        ContainerStack stack1;
-        Container container(234);
-        stack1.give(container);
-
-        // Create crane with stack
-        ContainerStack storage[MAX_STACKS];
-        storage[0] = stack1;
-        Crane crane(-1, storage, Container());
-
-        crane.toTrailer(); // move crane to trailer at -2 position
-        Container container1(235);
-        crane.load(container1);
-        crane.forward(2);
         crane.putDown();
-        BOOST_REQUIRE_EQUAL(crane.getPosition(), 0);
+        BOOST_CHECK_EQUAL(crane.isWaitingEmpty(), true);
+        BOOST_CHECK_EQUAL(crane.getContainer().getNumber(), 0);
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_putDownCrane_checkContainerNumber) {
-        // Create stack with one container
-        ContainerStack stack1;
-        Container container(234);
-        stack1.give(container);
+    BOOST_AUTO_TEST_CASE(testCrane_putDownContainerCraneIsNotOverStack_shouldThrowException) {
+        Crane crane;
+        ContainerStack stack;
+        Container container1(1);
+        stack.give(container1);
+        crane.addStack(stack);
 
-        // Create crane with stack
-        ContainerStack storage[MAX_STACKS];
-        storage[0] = stack1;
-        Crane crane(-1, storage, Container());
+        BOOST_CHECK_THROW(crane.putDown(), std::runtime_error);
 
-        crane.toTrailer(); // move crane to trailer at -2 position
-        Container container1(235);
-        crane.load(container1);
-        crane.forward(2);
+        try {
+            crane.putDown();
+        } catch (std::runtime_error& e) {
+            BOOST_CHECK_EQUAL(e.what(), "Crane is not over the stack");
+        }
+    }
+
+    BOOST_AUTO_TEST_CASE(testCrane_putDownContainerCraneIsAlreadyUnloaded_shouldThrowException) {
+        Crane crane;
+        ContainerStack stack;
+        Container container1(1);
+        stack.give(container1);
+        crane.addStack(stack);
+
+        crane.forward(1);
+        crane.pickUp();
         crane.putDown();
-        BOOST_REQUIRE_EQUAL(crane.stackAt(0).at(1).getNumber(), 235);
+
+        BOOST_CHECK_THROW(crane.putDown(), std::runtime_error);
+
+        try {
+            crane.putDown();
+        } catch (std::runtime_error& e) {
+            BOOST_CHECK_EQUAL(e.what(), "Crane is already unloaded");
+        }
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_MoveCrane_checkPosition){
+    BOOST_AUTO_TEST_CASE(testCrane_stackAt_checkIfStackIsReturned) {
         Crane crane;
-        crane.toTrailer();
-        BOOST_REQUIRE_EQUAL(crane.getPosition(), -2);
+        ContainerStack stack;
+        Container container1(1);
+        stack.give(container1);
+        crane.addStack(stack);
+
+        BOOST_CHECK_EQUAL(crane.stackAt(0).at(0).getNumber(), 1);
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_checkContainer){
+    BOOST_AUTO_TEST_CASE(testCrane_stackAtCraneIsNotOverStack_shouldThrowException) {
         Crane crane;
-        Container container(234);
-        crane.toTrailer();
-        crane.load(container);
-        BOOST_REQUIRE_EQUAL(crane.getContainer().getNumber(), 234);
+        ContainerStack stack;
+        Container container1(1);
+        stack.give(container1);
+        crane.addStack(stack);
+
+        BOOST_CHECK_THROW(crane.stackAt(7), std::runtime_error);
+
+        try {
+            crane.stackAt(0);
+        } catch (std::runtime_error& e) {
+            BOOST_CHECK_EQUAL(e.what(), "Position is out of range");
+        }
     }
 
-    BOOST_AUTO_TEST_CASE(testCrane_checkStack){
-        // Create stack with one container
-        ContainerStack stack1;
-        Container container(234);
-        stack1.give(container);
-
-        // Create crane with stack
-        ContainerStack storage[MAX_STACKS];
-        storage[0] = stack1;
-        Crane crane(-1, storage, Container());
-
-        crane.toTrailer();
-        crane.load(container);
-        BOOST_REQUIRE_EQUAL(crane.stackAt(0).at(0).getNumber(), 234);
-    }
-
-    BOOST_AUTO_TEST_CASE(testCrane_checkCanPutDown){
+    BOOST_AUTO_TEST_CASE(testCrane_canPutDownContainer_checkIfContainerCanBePutDown) {
         Crane crane;
-        Container container(234);
-        crane.toTrailer();
-        crane.load(container);
-        BOOST_REQUIRE_EQUAL(crane.canPutDown(), false);
+        ContainerStack stack;
+        Container container1(1);
+        stack.give(container1);
+        crane.addStack(stack);
+
+        crane.forward(1);
+        crane.pickUp();
+        BOOST_CHECK_EQUAL(crane.canPutDown(), true);
     }
 
+    BOOST_AUTO_TEST_CASE(testCrane_canPutDownContainerCraneIsNotOverStack_shouldThrowException) {
+        Crane crane;
+        ContainerStack stack;
+        Container container1(1);
+        stack.give(container1);
+        crane.addStack(stack);
+
+        BOOST_CHECK_EQUAL(crane.canPutDown(), false);
+    }
 
 BOOST_AUTO_TEST_SUITE_END()
